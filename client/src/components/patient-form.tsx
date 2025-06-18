@@ -303,9 +303,68 @@ export default function PatientForm({ patient, onSuccess }: PatientFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Medical History</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Enter medical history" {...field} />
-              </FormControl>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    "Diabetes",
+                    "Hypertension", 
+                    "Heart Disease",
+                    "Asthma",
+                    "Depression",
+                    "Anxiety",
+                    "Arthritis",
+                    "Cancer",
+                    "Stroke",
+                    "Kidney Disease",
+                    "Liver Disease",
+                    "Thyroid Disorder"
+                  ].map((condition) => (
+                    <div key={condition} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={condition}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        onChange={(e) => {
+                          const currentValue = field.value || "";
+                          const conditions = currentValue.split(", ").filter(Boolean);
+                          if (e.target.checked) {
+                            if (!conditions.includes(condition)) {
+                              conditions.push(condition);
+                            }
+                          } else {
+                            const index = conditions.indexOf(condition);
+                            if (index > -1) {
+                              conditions.splice(index, 1);
+                            }
+                          }
+                          field.onChange(conditions.join(", "));
+                        }}
+                        checked={field.value?.includes(condition) || false}
+                      />
+                      <label htmlFor={condition} className="text-sm text-slate-700">
+                        {condition}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3">
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Additional Medical History Comments
+                  </label>
+                  <Textarea 
+                    placeholder="Enter any additional medical history details..."
+                    value={field.value?.includes("Additional:") ? field.value.split("Additional: ")[1] : ""}
+                    onChange={(e) => {
+                      const currentValue = field.value || "";
+                      const conditions = currentValue.split(", ").filter(c => !c.startsWith("Additional:"));
+                      if (e.target.value.trim()) {
+                        conditions.push(`Additional: ${e.target.value}`);
+                      }
+                      field.onChange(conditions.join(", "));
+                    }}
+                  />
+                </div>
+              </div>
               <FormMessage />
             </FormItem>
           )}

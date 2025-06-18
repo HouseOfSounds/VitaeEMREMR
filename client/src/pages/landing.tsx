@@ -12,7 +12,7 @@ export default function Landing() {
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mr-4">
               <Heart className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-slate-900">MedCore EMR</h1>
+            <h1 className="text-4xl font-bold text-slate-900">Vitae EMR</h1>
           </div>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
             Modern Electronic Medical Records platform designed for small hospitals and clinics. 
@@ -56,7 +56,7 @@ export default function Landing() {
         {/* Login Card */}
         <Card className="max-w-md mx-auto border-0 shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to MedCore EMR</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Vitae EMR</CardTitle>
             <CardDescription>
               Please log in to access your medical records platform
             </CardDescription>

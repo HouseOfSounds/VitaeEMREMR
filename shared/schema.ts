@@ -86,15 +86,37 @@ export const clinicalNotes = pgTable("clinical_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Prescriptions table
+export const prescriptions = pgTable("prescriptions", {
+  id: serial("id").primaryKey(),
+  patientId: serial("patient_id").references(() => patients.id).notNull(),
+  doctorId: varchar("doctor_id").references(() => users.id).notNull(),
+  appointmentId: serial("appointment_id").references(() => appointments.id),
+  medicationName: varchar("medication_name").notNull(),
+  dosage: varchar("dosage").notNull(),
+  frequency: varchar("frequency").notNull(),
+  duration: varchar("duration").notNull(),
+  instructions: text("instructions"),
+  status: varchar("status").notNull().default("active"), // active, completed, discontinued
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  refillsRemaining: serial("refills_remaining").default(0),
+  pharmacyNotes: text("pharmacy_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   appointments: many(appointments),
   clinicalNotes: many(clinicalNotes),
+  prescriptions: many(prescriptions),
 }));
 
 export const patientsRelations = relations(patients, ({ many }) => ({
   appointments: many(appointments),
   clinicalNotes: many(clinicalNotes),
+  prescriptions: many(prescriptions),
 }));
 
 export const appointmentsRelations = relations(appointments, ({ one, many }) => ({
@@ -107,6 +129,7 @@ export const appointmentsRelations = relations(appointments, ({ one, many }) => 
     references: [users.id],
   }),
   clinicalNotes: many(clinicalNotes),
+  prescriptions: many(prescriptions),
 }));
 
 export const clinicalNotesRelations = relations(clinicalNotes, ({ one }) => ({
@@ -120,6 +143,21 @@ export const clinicalNotesRelations = relations(clinicalNotes, ({ one }) => ({
   }),
   appointment: one(appointments, {
     fields: [clinicalNotes.appointmentId],
+    references: [appointments.id],
+  }),
+}));
+
+export const prescriptionsRelations = relations(prescriptions, ({ one }) => ({
+  patient: one(patients, {
+    fields: [prescriptions.patientId],
+    references: [patients.id],
+  }),
+  doctor: one(users, {
+    fields: [prescriptions.doctorId],
+    references: [users.id],
+  }),
+  appointment: one(appointments, {
+    fields: [prescriptions.appointmentId],
     references: [appointments.id],
   }),
 }));
@@ -143,6 +181,12 @@ export const insertClinicalNoteSchema = createInsertSchema(clinicalNotes).omit({
   updatedAt: true,
 });
 
+export const insertPrescriptionSchema = createInsertSchema(prescriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -152,6 +196,8 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertClinicalNote = z.infer<typeof insertClinicalNoteSchema>;
 export type ClinicalNote = typeof clinicalNotes.$inferSelect;
+export type InsertPrescription = z.infer<typeof insertPrescriptionSchema>;
+export type Prescription = typeof prescriptions.$inferSelect;
 
 // Extended types for joins
 export type AppointmentWithPatient = Appointment & {
@@ -160,6 +206,12 @@ export type AppointmentWithPatient = Appointment & {
 };
 
 export type ClinicalNoteWithDetails = ClinicalNote & {
+  patient: Patient;
+  doctor: User;
+  appointment?: Appointment;
+};
+
+export type PrescriptionWithDetails = Prescription & {
   patient: Patient;
   doctor: User;
   appointment?: Appointment;

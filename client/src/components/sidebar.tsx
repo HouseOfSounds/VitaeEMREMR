@@ -48,7 +48,7 @@ export default function Sidebar() {
             <Heart className="text-white h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-slate-900">MedCore EMR</h1>
+            <h1 className="text-lg font-semibold text-slate-900">Vitae EMR</h1>
             <p className="text-sm text-slate-500">St. Mary's Hospital</p>
           </div>
         </div>
