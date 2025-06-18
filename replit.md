@@ -126,7 +126,8 @@ MedCore EMR is a modern Electronic Medical Records platform designed for small h
 
 ## Changelog
 
-- June 18, 2025. Initial setup
+- June 18, 2025: Initial setup with core EMR functionality
+- June 18, 2025: Major expansion - Added Prescriptions, Analytics, Staff Management, and Settings modules with complete CRUD operations and UI
 
 ## User Preferences
 

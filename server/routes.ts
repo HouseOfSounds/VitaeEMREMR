@@ -273,6 +273,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Prescription routes
+  app.get('/api/prescriptions', isAuthenticated, async (req, res) => {
+    try {
+      const prescriptions = await storage.getPrescriptions();
+      res.json(prescriptions);
+    } catch (error) {
+      console.error("Error fetching prescriptions:", error);
+      res.status(500).json({ message: "Failed to fetch prescriptions" });
+    }
+  });
+
+  app.get('/api/prescriptions/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const prescription = await storage.getPrescription(id);
+      if (!prescription) {
+        return res.status(404).json({ message: "Prescription not found" });
+      }
+      res.json(prescription);
+    } catch (error) {
+      console.error("Error fetching prescription:", error);
+      res.status(500).json({ message: "Failed to fetch prescription" });
+    }
+  });
+
+  app.post('/api/prescriptions', isAuthenticated, async (req, res) => {
+    try {
+      const prescriptionData = insertPrescriptionSchema.parse(req.body);
+      const prescription = await storage.createPrescription(prescriptionData);
+      res.status(201).json(prescription);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid prescription data", errors: error.errors });
+      }
+      console.error("Error creating prescription:", error);
+      res.status(500).json({ message: "Failed to create prescription" });
+    }
+  });
+
+  app.put('/api/prescriptions/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const prescriptionData = insertPrescriptionSchema.partial().parse(req.body);
+      const prescription = await storage.updatePrescription(id, prescriptionData);
+      res.json(prescription);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid prescription data", errors: error.errors });
+      }
+      console.error("Error updating prescription:", error);
+      res.status(500).json({ message: "Failed to update prescription" });
+    }
+  });
+
+  app.delete('/api/prescriptions/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePrescription(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting prescription:", error);
+      res.status(500).json({ message: "Failed to delete prescription" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
