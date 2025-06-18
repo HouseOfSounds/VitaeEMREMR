@@ -9,6 +9,10 @@ import Dashboard from "@/pages/dashboard";
 import Patients from "@/pages/patients";
 import Appointments from "@/pages/appointments";
 import ClinicalNotes from "@/pages/clinical-notes";
+import Prescriptions from "@/pages/prescriptions";
+import Analytics from "@/pages/analytics";
+import Staff from "@/pages/staff";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,11 +28,10 @@ function Router() {
           <Route path="/patients" component={Patients} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/clinical-notes" component={ClinicalNotes} />
-          {/* Placeholder routes for future pages */}
-          <Route path="/prescriptions" component={() => <div className="p-8 text-center"><h1 className="text-2xl font-semibold text-slate-900">Prescriptions</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/analytics" component={() => <div className="p-8 text-center"><h1 className="text-2xl font-semibold text-slate-900">Analytics</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/staff" component={() => <div className="p-8 text-center"><h1 className="text-2xl font-semibold text-slate-900">Staff Management</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>} />
-          <Route path="/settings" component={() => <div className="p-8 text-center"><h1 className="text-2xl font-semibold text-slate-900">Settings</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>} />
+          <Route path="/prescriptions" component={Prescriptions} />
+          <Route path="/analytics" component={Analytics} />
+          <Route path="/staff" component={Staff} />
+          <Route path="/settings" component={Settings} />
           <Route path="/billing" component={() => <div className="p-8 text-center"><h1 className="text-2xl font-semibold text-slate-900">Billing</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>} />
         </>
       )}

@@ -9,6 +9,7 @@ import {
   date,
   time,
   boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -100,7 +101,7 @@ export const prescriptions = pgTable("prescriptions", {
   status: varchar("status").notNull().default("active"), // active, completed, discontinued
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
-  refillsRemaining: serial("refills_remaining").default(0),
+  refillsRemaining: integer("refills_remaining").default(0),
   pharmacyNotes: text("pharmacy_notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
