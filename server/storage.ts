@@ -3,6 +3,7 @@ import {
   patients,
   appointments,
   clinicalNotes,
+  prescriptions,
   type User,
   type UpsertUser,
   type Patient,
@@ -13,6 +14,9 @@ import {
   type InsertClinicalNote,
   type AppointmentWithPatient,
   type ClinicalNoteWithDetails,
+  type Prescription,
+  type InsertPrescription,
+  type PrescriptionWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
@@ -47,6 +51,14 @@ export interface IStorage {
   updateClinicalNote(id: number, note: Partial<InsertClinicalNote>): Promise<ClinicalNote>;
   deleteClinicalNote(id: number): Promise<void>;
   getClinicalNotesByPatient(patientId: number): Promise<ClinicalNoteWithDetails[]>;
+
+  // Prescription operations
+  getPrescriptions(): Promise<PrescriptionWithDetails[]>;
+  getPrescription(id: number): Promise<PrescriptionWithDetails | undefined>;
+  createPrescription(prescription: InsertPrescription): Promise<Prescription>;
+  updatePrescription(id: number, prescription: Partial<InsertPrescription>): Promise<Prescription>;
+  deletePrescription(id: number): Promise<void>;
+  getPrescriptionsByPatient(patientId: number): Promise<PrescriptionWithDetails[]>;
 
   // Dashboard metrics
   getDashboardMetrics(): Promise<{
@@ -278,6 +290,87 @@ export class DatabaseStorage implements IStorage {
       .then(rows => 
         rows.map(row => ({
           ...row.clinical_notes,
+          patient: row.patients!,
+          doctor: row.users!,
+          appointment: row.appointments || undefined,
+        }))
+      );
+  }
+
+  // Prescription operations
+  async getPrescriptions(): Promise<PrescriptionWithDetails[]> {
+    return await db
+      .select()
+      .from(prescriptions)
+      .leftJoin(patients, eq(prescriptions.patientId, patients.id))
+      .leftJoin(users, eq(prescriptions.doctorId, users.id))
+      .leftJoin(appointments, eq(prescriptions.appointmentId, appointments.id))
+      .orderBy(desc(prescriptions.createdAt))
+      .then(rows => 
+        rows.map(row => ({
+          ...row.prescriptions,
+          patient: row.patients!,
+          doctor: row.users!,
+          appointment: row.appointments || undefined,
+        }))
+      );
+  }
+
+  async getPrescription(id: number): Promise<PrescriptionWithDetails | undefined> {
+    const [result] = await db
+      .select()
+      .from(prescriptions)
+      .leftJoin(patients, eq(prescriptions.patientId, patients.id))
+      .leftJoin(users, eq(prescriptions.doctorId, users.id))
+      .leftJoin(appointments, eq(prescriptions.appointmentId, appointments.id))
+      .where(eq(prescriptions.id, id));
+
+    if (!result) return undefined;
+
+    return {
+      ...result.prescriptions,
+      patient: result.patients!,
+      doctor: result.users!,
+      appointment: result.appointments || undefined,
+    };
+  }
+
+  async createPrescription(prescription: InsertPrescription): Promise<Prescription> {
+    const [newPrescription] = await db
+      .insert(prescriptions)
+      .values(prescription)
+      .returning();
+    return newPrescription;
+  }
+
+  async updatePrescription(id: number, prescription: Partial<InsertPrescription>): Promise<Prescription> {
+    const [updatedPrescription] = await db
+      .update(prescriptions)
+      .set({
+        ...prescription,
+        updatedAt: new Date(),
+      })
+      .where(eq(prescriptions.id, id))
+      .returning();
+    return updatedPrescription;
+  }
+
+  async deletePrescription(id: number): Promise<void> {
+    await db.delete(prescriptions).where(eq(prescriptions.id, id));
+  }
+
+  async getPrescriptionsByPatient(patientId: number): Promise<PrescriptionWithDetails[]> {
+    return await db
+      .select()
+      .from(prescriptions)
+      .leftJoin(patients, eq(prescriptions.patientId, patients.id))
+      .leftJoin(users, eq(prescriptions.doctorId, users.id))
+      .leftJoin(appointments, eq(prescriptions.appointmentId, appointments.id))
+      .where(eq(prescriptions.patientId, patientId))
+      .orderBy(desc(prescriptions.createdAt))
+      .then(rows => 
+        rows.map(row => ({
+          ...row.prescriptions,
           patient: row.patients!,
           doctor: row.users!,
           appointment: row.appointments || undefined,
